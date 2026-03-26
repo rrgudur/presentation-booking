@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PresentSlot — Class Booking</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+:root,[data-theme="light"]{
+  --color-bg:#f4f6fb;--color-surface:#ffffff;--color-surface-2:#f8f9fc;
+  --color-surface-offset:#eef1f8;--color-divider:#e2e6f0;--color-border:#d0d5e8;
+  --color-text:#1a1d2e;--color-text-muted:#6b7280;--color-text-faint:#b0b8cc;
+  --color-text-inverse:#f8f9fc;
+  --color-primary:#2a5fb0;--color-primary-hover:#1e4a8a;--color-primary-active:#163668;
+  --color-primary-highlight:#d6e4f7;
+  --color-teal:#0891b2;--color-teal-highlight:#cff0f8;
+  --color-success:#059669;--color-success-highlight:#d1fae5;
+  --color-error:#dc2626;--color-error-highlight:#fee2e2;
+  --color-warning:#d97706;--color-warning-highlight:#fef3c7;
+  --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-2xl:1.25rem;--radius-full:9999px;
+  --shadow-sm:0 1px 3px rgba(42,95,176,.07),0 1px 2px rgba(42,95,176,.04);
+  --shadow-md:0 4px 12px rgba(42,95,176,.10),0 2px 6px rgba(42,95,176,.06);
+  --shadow-lg:0 8px 24px rgba(42,95,176,.12),0 4px 12px rgba(42,95,176,.08);
+  --transition:180ms cubic-bezier(.16,1,.3,1);
+  --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;
+  --text-xs:clamp(.75rem,.7rem + .25vw,.875rem);--text-sm:clamp(.875rem,.8rem + .35vw,1rem);
+  --text-base:clamp(1rem,.95rem + .25vw,1.125rem);--text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);
+  --text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);
+  --font-display:'Cabinet Grotesk','Helvetica Neue',sans-serif;
+  --font-body:'Satoshi','Inter',sans-serif;
+}
+[data-theme="dark"]{
+  --color-bg:#0e1117;--color-surface:#161b27;--color-surface-2:#1c2235;
+  --color-surface-offset:#1a2032;--color-divider:#252d3f;--color-border:#2d3650;
+  --color-text:#e2e8f0;--color-text-muted:#8892a4;--color-text-faint:#4a5568;
+  --color-primary:#5b8dd9;--color-primary-hover:#7aaae6;--color-primary-active:#3a6ab8;
+  --color-primary-highlight:#1e2d4a;
+  --color-teal:#38bdf8;--color-teal-highlight:#0c2d3e;
+  --color-success:#34d399;--color-success-highlight:#022c22;
+  --color-error:#f87171;--color-error-highlight:#2d0a0a;
+  --color-warning:#fbbf24;--color-warning-highlight:#2d1800;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.25);--shadow-md:0 4px 12px rgba(0,0,0,.35);--shadow-lg:0 8px 24px rgba(0,0,0,.45);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){
+  --color-bg:#0e1117;--color-surface:#161b27;--color-surface-2:#1c2235;
+  --color-surface-offset:#1a2032;--color-divider:#252d3f;--color-border:#2d3650;
+  --color-text:#e2e8f0;--color-text-muted:#8892a4;--color-text-faint:#4a5568;
+  --color-primary:#5b8dd9;--color-primary-hover:#7aaae6;--color-primary-highlight:#1e2d4a;
+  --color-teal:#38bdf8;--color-teal-highlight:#0c2d3e;
+  --color-success:#34d399;--color-success-highlight:#022c22;
+  --color-error:#f87171;--color-error-highlight:#2d0a0a;
+}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:none;text-size-adjust:none;-webkit-font-smoothing:antialiased;scroll-behavior:smooth;}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);line-height:1.6;}
+img,svg{display:block;max-width:100%;}
+input,button,textarea,select{font:inherit;color:inherit;}
+h1,h2,h3,h4{font-family:var(--font-display);text-wrap:balance;line-height:1.15;}
+button{cursor:pointer;background:none;border:none;}
+a,button,[role="button"],input,textarea,select{transition:color var(--transition),background var(--transition),border-color var(--transition),box-shadow var(--transition),opacity var(--transition);}
+:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-sm);}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+
+/* LAYOUT */
+.app-wrapper{min-height:100dvh;display:flex;flex-direction:column;}
+
+/* HEADER */
+.site-header{background:var(--color-surface);border-bottom:1px solid var(--color-divider);box-shadow:var(--shadow-sm);position:sticky;top:0;z-index:100;}
+.header-inner{max-width:1100px;margin:0 auto;padding:var(--space-3) var(--space-6);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);}
+.brand{display:flex;align-items:center;gap:var(--space-3);text-decoration:none;color:inherit;}
+.brand-name{font-family:var(--font-display);font-size:var(--text-lg);font-weight:800;}
+.brand-sub{font-size:var(--text-xs);color:var(--color-text-muted);}
+.header-right{display:flex;align-items:center;gap:var(--space-2);}
+.icon-btn{width:36px;height:36px;border-radius:var(--radius-full);background:var(--color-surface-offset);border:1px solid var(--color-border);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);}
+.icon-btn:hover{background:var(--color-primary-highlight);color:var(--color-primary);}
+.admin-badge{display:none;align-items:center;gap:var(--space-2);background:var(--color-primary-highlight);color:var(--color-primary);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3);font-size:var(--text-xs);font-weight:600;cursor:pointer;}
+.admin-badge:hover{background:var(--color-primary);color:#fff;}
+.admin-badge.visible{display:flex;}
+.admin-tabs{display:none;align-items:center;gap:2px;background:var(--color-surface-offset);border-radius:var(--radius-full);padding:3px;}
+.admin-tabs.visible{display:flex;}
+.admin-tab{padding:var(--space-2) var(--space-4);border-radius:var(--radius-full);font-size:var(--text-sm);font-weight:500;color:var(--color-text-muted);cursor:pointer;white-space:nowrap;}
+.admin-tab:hover{color:var(--color-text);}
+.admin-tab.active{background:var(--color-surface);color:var(--color-primary);box-shadow:var(--shadow-sm);font-weight:600;}
+
+/* MAIN */
+.main-content{flex:1;max-width:1100px;width:100%;margin:0 auto;padding:var(--space-8) var(--space-6);}
+
+/* HERO */
+.hero-strip{
+  background:linear-gradient(135deg,var(--color-primary) 0%,var(--color-teal) 100%);
+  border-radius:var(--radius-2xl);padding:var(--space-8) var(--space-8);
+  margin-bottom:var(--space-8);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;gap:var(--space-6);
+  position:relative;overflow:hidden;
+}
+.hero-strip::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:rgba(255,255,255,.07);border-radius:50%;}
+.hero-strip::after{content:'';position:absolute;bottom:-80px;left:30%;width:300px;height:300px;background:rgba(255,255,255,.04);border-radius:50%;}
+.hero-text h1{font-size:var(--text-xl);color:#fff;margin-bottom:var(--space-2);}
+.hero-text p{opacity:.85;font-size:var(--text-sm);max-width:48ch;}
+.hero-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:var(--radius-xl);padding:var(--space-4) var(--space-6);text-align:center;flex-shrink:0;z-index:1;}
+.hero-badge .badge-num{font-family:var(--font-display);font-size:2rem;font-weight:800;line-height:1;}
+.hero-badge .badge-label{font-size:var(--text-xs);opacity:.8;margin-top:var(--space-1);}
+
+/* PANELS */
+.panel{display:none;}.panel.active{display:block;}
+
+/* BOOKING GRID */
+.booking-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:var(--space-6);align-items:start;}
+@media(max-width:768px){.booking-grid{grid-template-columns:1fr;}}
+
+/* SLOT PICKER */
+.slot-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);overflow:hidden;}
+.slot-card-header{padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--color-divider);display:flex;align-items:center;justify-content:space-between;}
+.slot-card-header h3{font-size:var(--text-base);font-weight:600;}
+.slot-date-label{font-size:var(--text-xs);color:var(--color-text-muted);}
+.slots-list{padding:var(--space-3);max-height:420px;overflow-y:auto;}
+.slot-item{display:flex;align-items:center;justify-content:space-between;padding:var(--space-3) var(--space-4);border-radius:var(--radius-lg);cursor:pointer;margin-bottom:2px;border:1.5px solid transparent;user-select:none;}
+.slot-item:hover:not(.booked):not(.selected){background:var(--color-surface-offset);border-color:var(--color-border);}
+.slot-item.selected{background:var(--color-primary-highlight);border-color:var(--color-primary);}
+.slot-item.booked{opacity:.5;cursor:not-allowed;background:var(--color-surface-offset);}
+.slot-time{font-weight:600;font-size:var(--text-sm);font-variant-numeric:tabular-nums;}
+.slot-duration{font-size:var(--text-xs);color:var(--color-text-muted);}
+.slot-badge{font-size:var(--text-xs);font-weight:500;padding:2px var(--space-2);border-radius:var(--radius-full);}
+.slot-badge.open{background:var(--color-success-highlight);color:var(--color-success);}
+.slot-badge.taken{background:var(--color-surface-offset);color:var(--color-text-faint);}
+.slot-badge.picked{background:var(--color-primary);color:#fff;}
+.empty-state{text-align:center;padding:var(--space-10) var(--space-4);color:var(--color-text-muted);}
+.empty-state svg{margin:0 auto var(--space-3);opacity:.3;}
+.empty-state p{font-size:var(--text-sm);}
+
+/* FORM CARD */
+.form-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);padding:var(--space-6);}
+.form-card h3{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-base);font-weight:700;margin-bottom:var(--space-5);}
+.slot-display{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-offset);border:1px dashed var(--color-border);margin-bottom:var(--space-5);}
+.slot-display.has-slot{background:var(--color-primary-highlight);border:1px solid var(--color-primary);border-style:solid;}
+.slot-display-time{font-weight:700;font-size:var(--text-base);color:var(--color-primary);}
+.slot-display-hint{font-size:var(--text-xs);color:var(--color-text-muted);}
+.field-group{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-4);}
+.field-group label{font-size:var(--text-sm);font-weight:600;color:var(--color-text);}
+.field-group input,.field-group textarea,.field-group select{
+  padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);
+  border:1px solid var(--color-border);background:var(--color-surface-2);
+  color:var(--color-text);font-size:var(--text-sm);width:100%;
+}
+.field-group input:focus,.field-group textarea:focus{border-color:var(--color-primary);background:var(--color-surface);box-shadow:0 0 0 3px var(--color-primary-highlight);}
+.field-group textarea{resize:vertical;min-height:90px;line-height:1.5;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);}
+@media(max-width:500px){.field-row{grid-template-columns:1fr;}}
+.field-hint{font-size:var(--text-xs);color:var(--color-text-muted);}
+.field-error{font-size:var(--text-xs);color:var(--color-error);display:none;}
+.field-group.error input,.field-group.error textarea{border-color:var(--color-error);box-shadow:0 0 0 3px var(--color-error-highlight);}
+.field-group.error .field-error{display:block;}
+.required{color:var(--color-error);}
+.char-counter{font-size:var(--text-xs);color:var(--color-text-faint);text-align:right;margin-top:var(--space-1);}
+.btn-submit{
+  width:100%;padding:var(--space-4);border-radius:var(--radius-lg);
+  background:var(--color-primary);color:#fff;font-weight:700;font-size:var(--text-sm);
+  display:flex;align-items:center;justify-content:center;gap:var(--space-2);
+  box-shadow:var(--shadow-md);margin-top:var(--space-2);
+}
+.btn-submit:hover:not(:disabled){background:var(--color-primary-hover);}
+.btn-submit:disabled{opacity:.45;cursor:not-allowed;}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+.btn-submit.loading .spinner{display:block;}
+.btn-submit.loading .btn-label{opacity:.7;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ADMIN BOOKINGS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4);margin-bottom:var(--space-6);}
+@media(max-width:700px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);box-shadow:var(--shadow-sm);}
+.stat-label{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:var(--space-2);}
+.stat-value{font-family:var(--font-display);font-size:1.8rem;font-weight:800;line-height:1;color:var(--color-primary);font-variant-numeric:tabular-nums;}
+.stat-sub{font-size:var(--text-xs);color:var(--color-text-faint);margin-top:var(--space-1);}
+.table-wrap{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);overflow:hidden;}
+.table-toolbar{padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--color-divider);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap;}
+.table-toolbar h3{font-size:var(--text-base);font-weight:700;}
+.toolbar-actions{display:flex;gap:var(--space-2);}
+.btn-secondary{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface);font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);}
+.btn-secondary:hover{background:var(--color-surface-offset);color:var(--color-text);}
+.table-scroll{overflow-x:auto;}
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{background:var(--color-surface-offset);padding:var(--space-3) var(--space-4);text-align:left;font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--color-divider);white-space:nowrap;}
+.data-table td{padding:var(--space-3) var(--space-4);font-size:var(--text-sm);border-bottom:1px solid var(--color-divider);vertical-align:top;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:var(--color-surface-offset);}
+.no-bookings{text-align:center;padding:var(--space-12) var(--space-4);color:var(--color-text-muted);}
+.no-bookings svg{margin:0 auto var(--space-3);opacity:.3;}
+
+/* SETTINGS */
+.section-hdr{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-6);}
+.section-hdr-icon{width:40px;height:40px;border-radius:var(--radius-lg);background:var(--color-primary-highlight);color:var(--color-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-hdr h2{font-size:var(--text-lg);font-weight:700;}
+.section-hdr p{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:2px;}
+.config-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);padding:var(--space-6);margin-bottom:var(--space-6);}
+.config-card h3{font-size:var(--text-base);font-weight:700;margin-bottom:var(--space-2);}
+.config-card>p{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-5);}
+.divider{border:none;border-top:1px solid var(--color-divider);margin:var(--space-6) 0;}
+.config-notice{background:var(--color-primary-highlight);border:1px solid var(--color-primary);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);display:flex;gap:var(--space-3);margin-bottom:var(--space-5);}
+.config-notice-icon{color:var(--color-primary);flex-shrink:0;margin-top:2px;}
+.config-notice ol{padding-left:var(--space-5);margin-top:var(--space-2);}
+.config-notice li{font-size:var(--text-sm);margin-bottom:var(--space-1);}
+.config-notice h4{font-size:var(--text-sm);font-weight:700;}
+code{background:var(--color-surface-offset);padding:1px 5px;border-radius:3px;font-size:.85em;}
+.btn-save{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-5);border-radius:var(--radius-md);background:var(--color-primary);color:#fff;font-size:var(--text-sm);font-weight:600;box-shadow:var(--shadow-sm);}
+.btn-save:hover{background:var(--color-primary-hover);}
+.btn-save:disabled{opacity:.5;cursor:not-allowed;}
+.btn-teal{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-5);border-radius:var(--radius-md);background:var(--color-teal);color:#fff;font-size:var(--text-sm);font-weight:600;box-shadow:var(--shadow-sm);}
+.btn-teal:hover:not(:disabled){filter:brightness(1.1);}
+.btn-teal:disabled{opacity:.5;cursor:not-allowed;}
+.flash-msg{display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-success);opacity:0;transition:opacity .4s;pointer-events:none;}
+.flash-msg.show{opacity:1;}
+.sheets-status{font-size:var(--text-xs);margin-top:var(--space-3);padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);display:none;}
+.sheets-status.ok{background:var(--color-success-highlight);color:var(--color-success);}
+.sheets-status.err{background:var(--color-error-highlight);color:var(--color-error);}
+pre.script-block{background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-4);font-size:.7rem;overflow-x:auto;white-space:pre;line-height:1.6;color:var(--color-text);margin-top:var(--space-3);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:var(--space-4);z-index:999;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.visible{opacity:1;pointer-events:all;}
+.modal-box{background:var(--color-surface);border-radius:var(--radius-2xl);padding:var(--space-8);max-width:480px;width:100%;box-shadow:var(--shadow-lg);text-align:center;transform:translateY(12px);transition:transform .3s cubic-bezier(.16,1,.3,1);}
+.modal-overlay.visible .modal-box{transform:translateY(0);}
+.success-icon{width:60px;height:60px;border-radius:var(--radius-full);background:var(--color-success-highlight);color:var(--color-success);display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-4);}
+.modal-box h2{margin-bottom:var(--space-2);}
+.modal-box p{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-6);}
+.modal-summary{background:var(--color-surface-offset);border-radius:var(--radius-lg);padding:var(--space-4);text-align:left;margin-bottom:var(--space-5);}
+.modal-summary-row{display:flex;gap:var(--space-3);padding:var(--space-2) 0;border-bottom:1px solid var(--color-divider);font-size:var(--text-sm);}
+.modal-summary-row:last-child{border-bottom:none;}
+.modal-summary-row .lbl{font-weight:600;min-width:90px;color:var(--color-text-muted);}
+.modal-close-btn{padding:var(--space-3) var(--space-8);border-radius:var(--radius-md);background:var(--color-primary);color:#fff;font-weight:600;font-size:var(--text-sm);}
+.modal-close-btn:hover{background:var(--color-primary-hover);}
+
+/* PW MODAL */
+.pw-modal-box{max-width:380px;}
+.pw-input-wrap{position:relative;margin-bottom:var(--space-4);}
+.pw-input-wrap input{width:100%;padding:var(--space-3) var(--space-10) var(--space-3) var(--space-4);border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-base);}
+.pw-input-wrap input:focus{border-color:var(--color-primary);outline:none;box-shadow:0 0 0 3px var(--color-primary-highlight);}
+.pw-toggle{position:absolute;right:var(--space-3);top:50%;transform:translateY(-50%);color:var(--color-text-muted);padding:var(--space-1);}
+.pw-error{font-size:var(--text-xs);color:var(--color-error);margin-bottom:var(--space-3);display:none;}
+.pw-actions{display:flex;gap:var(--space-3);justify-content:center;}
+.pw-actions .btn-save{flex:1;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.anim{animation:fadeUp .3s ease both;}
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <svg aria-label="PresentSlot logo" viewBox="0 0 32 32" width="28" height="28" fill="none">
+        <rect width="32" height="32" rx="8" fill="#2a5fb0"/>
+        <rect x="8" y="10" width="16" height="2" rx="1" fill="#fff"/>
+        <rect x="8" y="15" width="10" height="2" rx="1" fill="#fff" opacity=".7"/>
+        <rect x="8" y="20" width="12" height="2" rx="1" fill="#fff" opacity=".5"/>
+        <circle cx="24" cy="21" r="5" fill="#0891b2" stroke="#fff" stroke-width="1.5"/>
+        <path d="M22 21l1.5 1.5L26 19" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="brand-name">PresentSlot</div>
+        <div class="brand-sub" id="brand-sub-text">Class Presentation Booking</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="admin-tabs" id="admin-tabs" role="tablist">
+        <button class="admin-tab active" data-panel="admin" role="tab" aria-selected="true">Bookings</button>
+        <button class="admin-tab" data-panel="config" role="tab" aria-selected="false">Settings</button>
+      </div>
+      <div class="admin-badge" id="admin-badge" title="Signed in as admin">
+        <i data-lucide="shield-check" width="13" height="13"></i>
+        <span>Admin</span>
+        <i data-lucide="x" width="13" height="13" style="opacity:.6"></i>
+      </div>
+      <button class="icon-btn" id="btn-open-admin" aria-label="Admin login" title="Admin">
+        <i data-lucide="lock" width="16" height="16"></i>
+      </button>
+      <button class="icon-btn" id="theme-toggle" data-theme-toggle aria-label="Toggle dark mode">
+        <i data-lucide="moon" width="16" height="16"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="main-content">
+
+<!-- BOOKING PANEL -->
+<div class="panel active" id="panel-book">
+  <div class="hero-strip">
+    <div class="hero-text">
+      <h1>Book Your Presentation Slot</h1>
+      <p>Select a 5-minute slot, fill in your details, and confirm your booking below.</p>
+    </div>
+    <div class="hero-badge">
+      <div class="badge-num" id="hero-available">—</div>
+      <div class="badge-label">slots available</div>
+    </div>
+  </div>
+  <div class="booking-grid">
+    <div class="slot-card anim">
+      <div class="slot-card-header">
+        <div>
+          <h3>Available Time Slots</h3>
+          <div class="slot-date-label" id="session-date-label">Session date not set</div>
+        </div>
+        <i data-lucide="clock" width="18" height="18" style="color:var(--color-text-muted)"></i>
+      </div>
+      <div class="slots-list" id="slots-list" role="listbox" aria-label="Time slots"></div>
+    </div>
+    <div class="form-card anim">
+      <h3><i data-lucide="user" width="18" height="18" style="color:var(--color-primary)"></i>Your Details</h3>
+      <div class="slot-display" id="slot-display">
+        <i data-lucide="clock" width="18" height="18" style="color:var(--color-text-muted)"></i>
+        <div>
+          <div class="slot-display-time" id="slot-display-time">No slot selected</div>
+          <div class="slot-display-hint">Choose a time slot on the left</div>
+        </div>
+      </div>
+      <form id="booking-form" novalidate>
+        <div class="field-row">
+          <div class="field-group" id="fg-name">
+            <label for="inp-name">Full Name <span class="required">*</span></label>
+            <input type="text" id="inp-name" placeholder="Jane Smith" autocomplete="name" maxlength="80">
+            <div class="field-error">Please enter your full name.</div>
+          </div>
+          <div class="field-group" id="fg-id">
+            <label for="inp-id">Student ID <span class="required">*</span></label>
+            <input type="text" id="inp-id" placeholder="u1234567" maxlength="20">
+            <div class="field-error">Please enter your student ID.</div>
+          </div>
+        </div>
+        <div class="field-group" id="fg-email">
+          <label for="inp-email">Email <span style="font-weight:400;color:var(--color-text-muted)">(optional)</span></label>
+          <input type="email" id="inp-email" placeholder="jane@uni.edu.au" autocomplete="email" maxlength="100">
+        </div>
+        <div class="field-group" id="fg-title">
+          <label for="inp-title">Project Title <span class="required">*</span></label>
+          <input type="text" id="inp-title" placeholder="e.g. Inclusive Design for Ageing Populations" maxlength="120">
+          <div class="field-error">Please enter your project title.</div>
+        </div>
+        <div class="field-group" id="fg-desc">
+          <label for="inp-desc">Brief Description <span class="required">*</span></label>
+          <textarea id="inp-desc" placeholder="Describe your project in 2–3 sentences…" maxlength="400"></textarea>
+          <div style="display:flex;justify-content:space-between">
+            <div class="field-error">Please provide a brief description.</div>
+            <div class="char-counter" id="char-count">0 / 400</div>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit" id="submit-btn" disabled>
+          <div class="spinner"></div>
+          <span class="btn-label" style="display:flex;align-items:center;gap:8px">
+            <i data-lucide="calendar-check" width="16" height="16"></i>Confirm Booking
+          </span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN: BOOKINGS PANEL -->
+<div class="panel" id="panel-admin">
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card anim"><div class="stat-label">Total Slots</div><div class="stat-value" id="stat-total">0</div><div class="stat-sub">in session</div></div>
+    <div class="stat-card anim"><div class="stat-label">Booked</div><div class="stat-value" id="stat-booked">0</div><div class="stat-sub">confirmed</div></div>
+    <div class="stat-card anim"><div class="stat-label">Available</div><div class="stat-value" id="stat-avail">0</div><div class="stat-sub">remaining</div></div>
+    <div class="stat-card anim"><div class="stat-label">Fill Rate</div><div class="stat-value" id="stat-fill">0%</div><div class="stat-sub">utilisation</div></div>
+  </div>
+  <div class="table-wrap anim">
+    <div class="table-toolbar">
+      <h3>All Bookings</h3>
+      <div class="toolbar-actions">
+        <button class="btn-secondary" id="btn-export"><i data-lucide="download" width="13" height="13"></i> Export CSV</button>
+        <button class="btn-secondary" id="btn-clear" style="color:var(--color-error)"><i data-lucide="trash-2" width="13" height="13"></i> Clear All</button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Time</th><th>Name</th><th>Student ID</th><th>Project Title</th><th>Description</th><th>Email</th><th>Booked At</th></tr></thead>
+        <tbody id="bookings-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN: SETTINGS PANEL -->
+<div class="panel" id="panel-config">
+  <div class="section-hdr">
+    <div class="section-hdr-icon"><i data-lucide="settings" width="20" height="20"></i></div>
+    <div><h2>Settings</h2><p>Configure session details and Google Sheets integration</p></div>
+  </div>
+
+  <!-- SESSION CONFIG CARD -->
+  <div class="config-card anim">
+    <h3>Session Configuration</h3>
+    <p>Set the class presentation session parameters, then click Save Settings.</p>
+    <div class="field-row" style="margin-bottom:var(--space-4)">
+      <div class="field-group">
+        <label for="cfg-date">Session Date</label>
+        <input type="text" id="cfg-date" placeholder="e.g. Wednesday, 2 April 2026">
+      </div>
+      <div class="field-group">
+        <label for="cfg-course">Course / Unit Code</label>
+        <input type="text" id="cfg-course" placeholder="e.g. DSGN3041 — Inclusive Design">
+      </div>
+    </div>
+    <div class="field-row" style="margin-bottom:var(--space-4)">
+      <div class="field-group">
+        <label for="cfg-start">Start Time <span style="font-weight:400;color:var(--color-text-muted)">(24h)</span></label>
+        <input type="text" id="cfg-start" value="09:00" placeholder="09:00">
+      </div>
+      <div class="field-group">
+        <label for="cfg-end">End Time <span style="font-weight:400;color:var(--color-text-muted)">(24h)</span></label>
+        <input type="text" id="cfg-end" value="12:00" placeholder="12:00">
+      </div>
+    </div>
+    <div class="field-row" style="margin-bottom:var(--space-5)">
+      <div class="field-group">
+        <label for="cfg-break-start">Break Start <span style="font-weight:400;color:var(--color-text-muted)">(optional)</span></label>
+        <input type="text" id="cfg-break-start" placeholder="e.g. 10:30">
+      </div>
+      <div class="field-group">
+        <label for="cfg-break-end">Break End <span style="font-weight:400;color:var(--color-text-muted)">(optional)</span></label>
+        <input type="text" id="cfg-break-end" placeholder="e.g. 10:45">
+      </div>
+    </div>
+    <div class="field-group" style="margin-bottom:var(--space-6);max-width:320px">
+      <label for="cfg-admin-pw">Admin Password</label>
+      <input type="password" id="cfg-admin-pw" placeholder="Enter new password to change" maxlength="80">
+      <div class="field-hint">Leave blank to keep current password.</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
+      <button class="btn-save" id="btn-generate-slots">
+        <i data-lucide="refresh-cw" width="15" height="15"></i>Generate Time Slots
+      </button>
+      <span id="msg-slots" class="flash-msg"><i data-lucide="check-circle" width="14" height="14"></i> Slots generated!</span>
+    </div>
+  </div>
+
+  <!-- GOOGLE SHEETS CARD -->
+  <div class="config-card anim">
+    <h3>Google Sheets Integration</h3>
+    <p>Bookings <strong>and</strong> session settings are sent to Google Sheets via a Apps Script Web App.</p>
+    <div class="config-notice">
+      <span class="config-notice-icon"><i data-lucide="info" width="18" height="18"></i></span>
+      <div>
+        <h4>One-time setup</h4>
+        <ol>
+          <li>Open Google Sheets → create a new spreadsheet.</li>
+          <li>Go to <strong>Extensions → Apps Script</strong>.</li>
+          <li>Delete any existing code and paste the script below.</li>
+          <li>Click <strong>Deploy → New deployment → Web App</strong>.</li>
+          <li>Set <em>Execute as</em> = <code>Me</code>, <em>Who has access</em> = <code>Anyone</code>.</li>
+          <li>Copy the <strong>Web App URL</strong> and paste it in the field below.</li>
+          <li>Click <strong>Save &amp; Sync to Sheets</strong>.</li>
+        </ol>
+        <details style="margin-top:var(--space-3)">
+          <summary style="cursor:pointer;font-weight:600;font-size:var(--text-xs);color:var(--color-primary)">▶ Show Apps Script code</summary>
+          <pre class="script-block" id="apps-script-pre">function doPost(e) {
+  try {
+    var ss   = SpreadsheetApp.getActiveSpreadsheet();
+    var raw  = (e && e.postData && e.postData.contents) ? e.postData.contents : '{}';
+    var data = JSON.parse(raw);
+
+    // ── SESSION SETTINGS ──────────────────────────────────
+    if (data.type === 'settings') {
+      var sSheet = ss.getSheetByName('Session Settings');
+      if (!sSheet) {
+        sSheet = ss.insertSheet('Session Settings');
+        var hdr = ['Saved At','Session Date','Course','Start Time',
+                   'End Time','Break Start','Break End'];
+        sSheet.appendRow(hdr);
+        sSheet.getRange(1, 1, 1, hdr.length)
+              .setFontWeight('bold')
+              .setBackground('#0891b2')
+              .setFontColor('#ffffff');
+      }
+      sSheet.appendRow([
+        data.savedAt,
+        data.date       || '',
+        data.course     || '',
+        data.startTime  || '',
+        data.endTime    || '',
+        data.breakStart || '',
+        data.breakEnd   || ''
+      ]);
+      return ContentService
+        .createTextOutput(JSON.stringify({status:'ok', type:'settings'}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ── BOOKING ───────────────────────────────────────────
+    var sheet = ss.getSheetByName('Bookings') || ss.getActiveSheet();
+    if (sheet.getLastRow() === 0) {
+      var bHdr = ['Booking #','Time Slot','Full Name','Student ID',
+                  'Email','Project Title','Description','Booked At'];
+      sheet.appendRow(bHdr);
+      sheet.getRange(1, 1, 1, bHdr.length)
+           .setFontWeight('bold')
+           .setBackground('#2a5fb0')
+           .setFontColor('#ffffff');
+    }
+    var rowNum = sheet.getLastRow();
+    sheet.appendRow([
+      rowNum,
+      data.timeSlot,
+      data.name,
+      data.studentId,
+      data.email       || '',
+      data.title,
+      data.description,
+      data.bookedAt
+    ]);
+    return ContentService
+      .createTextOutput(JSON.stringify({status:'ok', row:rowNum}))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({status:'error', message:err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({status:'ok', message:'PresentSlot API ready'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+          <button onclick="copyScript()" class="btn-secondary" style="margin-top:var(--space-2);font-size:var(--text-xs)">
+            <i data-lucide="copy" width="12" height="12"></i> Copy script
+          </button>
+        </details>
+      </div>
+    </div>
+
+    <div class="field-group" style="margin-bottom:var(--space-5)">
+      <label for="cfg-sheets-url">Apps Script Web App URL</label>
+      <input type="url" id="cfg-sheets-url" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+      <div class="field-hint">Paste your deployed Web App URL here.</div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-3)">
+      <button class="btn-save" id="btn-save-config">
+        <i data-lucide="save" width="15" height="15"></i>Save &amp; Sync to Sheets
+      </button>
+      <span id="msg-saved" class="flash-msg"><i data-lucide="check-circle" width="14" height="14"></i> Settings saved!</span>
+      <button class="btn-secondary" id="btn-test-url" style="margin-left:auto">
+        <i data-lucide="zap" width="13" height="13"></i> Test Connection
+      </button>
+    </div>
+    <div class="sheets-status" id="sheets-status"></div>
+    <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-3)">
+      Clicking <strong>Save &amp; Sync to Sheets</strong> saves all settings locally <em>and</em> pushes session details (date, course, times) to the <strong>Session Settings</strong> tab in your spreadsheet.
+    </p>
+  </div>
+</div>
+
+</main>
+</div><!-- /app-wrapper -->
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="success-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-box">
+    <div class="success-icon"><i data-lucide="check" width="30" height="30" style="stroke-width:2.5"></i></div>
+    <h2 id="modal-title">Slot Booked!</h2>
+    <p>Your presentation slot has been confirmed. See your details below.</p>
+    <div class="modal-summary" id="modal-summary"></div>
+    <button class="modal-close-btn" id="modal-close">Done</button>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="modal-overlay" id="pw-modal" role="dialog" aria-modal="true" aria-labelledby="pw-modal-title">
+  <div class="modal-box pw-modal-box">
+    <div class="success-icon" style="background:var(--color-primary-highlight);color:var(--color-primary)">
+      <i data-lucide="lock" width="24" height="24"></i>
+    </div>
+    <h2 id="pw-modal-title">Admin Access</h2>
+    <p>Enter the admin password to manage bookings and settings.</p>
+    <div class="pw-input-wrap">
+      <input type="password" id="pw-input" placeholder="Password" maxlength="80" autocomplete="current-password">
+      <button class="pw-toggle" id="pw-toggle" aria-label="Show/hide password" type="button">
+        <i data-lucide="eye" width="16" height="16"></i>
+      </button>
+    </div>
+    <div class="pw-error" id="pw-error">Incorrect password. Please try again.</div>
+    <div class="pw-actions">
+      <button class="btn-secondary" id="pw-cancel">Cancel</button>
+      <button class="btn-save" id="pw-submit">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ──────────────────────────────────────────────────────────────────
+const state = {
+  slots: [],
+  bookings: [],
+  selectedSlot: null,
+  adminAuth: false,
+  config: {
+    date: '', course: '',
+    startTime: '09:00', endTime: '12:00',
+    breakStart: '', breakEnd: '',
+    sheetsUrl: '', adminPassword: 'admin1234'
+  }
+};
+
+// ─── UTILS ──────────────────────────────────────────────────────────────────
+const pad = n => String(n).padStart(2,'0');
+function parseHHMM(s){ const [h,m]=s.split(':').map(Number); return h*60+m; }
+function minsToHHMM(m){ return `${pad(Math.floor(m/60))}:${pad(m%60)}`; }
+function fmtTime(s){
+  const [h,m]=s.split(':').map(Number);
+  const ap=h<12?'am':'pm', hr=h%12||12;
+  return `${hr}:${pad(m)} ${ap}`;
+}
+function now(){ return new Date().toLocaleString('en-AU',{timeZone:'Australia/Canberra',dateStyle:'medium',timeStyle:'short'}); }
+
+function flash(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+function showStatus(msg, type){
+  const el=document.getElementById('sheets-status');
+  el.textContent=msg; el.className='sheets-status '+type; el.style.display='block';
+  if(type==='ok') setTimeout(()=>{ el.style.display='none'; }, 4000);
+}
+
+// ─── SLOT GENERATION ────────────────────────────────────────────────────────
+function generateSlots(){
+  const {startTime, endTime, breakStart, breakEnd} = state.config;
+  if(!startTime || !endTime){ alert('Please set Start and End times first.'); return; }
+  const start = parseHHMM(startTime), end = parseHHMM(endTime);
+  if(start >= end){ alert('Start time must be before End time.'); return; }
+  const bs = breakStart ? parseHHMM(breakStart) : null;
+  const be = breakEnd   ? parseHHMM(breakEnd)   : null;
+  const newSlots = [];
+  for(let t=start; t+5<=end; t+=5){
+    if(bs!==null && be!==null && t>=bs && t<be) continue;
+    const id = minsToHHMM(t);
+    const existing = state.slots.find(s=>s.id===id);
+    newSlots.push({ id, label:`${fmtTime(id)} – ${fmtTime(minsToHHMM(t+5))}`, booked: existing?existing.booked:false, bookedBy: existing?existing.bookedBy:null });
+  }
+  state.slots = newSlots;
+  state.selectedSlot = null;
+  renderSlots();
+  updateHeroBadge();
+  flash('msg-slots');
+}
+
+// ─── RENDER SLOTS ────────────────────────────────────────────────────────────
+function renderSlots(){
+  const list = document.getElementById('slots-list');
+  if(!state.slots.length){
+    list.innerHTML = `<div class="empty-state"><i data-lucide="calendar-off" width="32" height="32"></i><p>No time slots available.<br>Please ask your instructor to configure session times.</p></div>`;
+    lucide.createIcons(); return;
+  }
+  list.innerHTML = state.slots.map((s,i) => {
+    const cls = s.booked ? 'booked' : (state.selectedSlot===i ? 'selected' : '');
+    const badge = s.booked ? '<span class="slot-badge taken">Taken</span>' :
+                  (state.selectedSlot===i ? '<span class="slot-badge picked">Selected</span>' :
+                  '<span class="slot-badge open">Open</span>');
+    return `<div class="slot-item ${cls}" role="option" tabindex="${s.booked?-1:0}" aria-selected="${state.selectedSlot===i}" data-idx="${i}">
+      <div><div class="slot-time">${fmtTime(s.id)}</div><div class="slot-duration">5 min</div></div>${badge}</div>`;
+  }).join('');
+  list.querySelectorAll('.slot-item:not(.booked)').forEach(el=>{
+    el.addEventListener('click',()=>selectSlot(+el.dataset.idx));
+    el.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectSlot(+el.dataset.idx); }});
+  });
+  lucide.createIcons();
+}
+
+function selectSlot(idx){
+  if(state.slots[idx]?.booked) return;
+  state.selectedSlot = idx;
+  renderSlots();
+  const s = state.slots[idx];
+  const disp = document.getElementById('slot-display');
+  document.getElementById('slot-display-time').textContent = s.label;
+  disp.classList.add('has-slot');
+  document.getElementById('submit-btn').disabled = false;
+}
+
+function updateHeroBadge(){
+  const avail = state.slots.filter(s=>!s.booked).length;
+  document.getElementById('hero-available').textContent = avail;
+}
+
+// ─── BOOKING SUBMIT ──────────────────────────────────────────────────────────
+document.getElementById('booking-form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  if(state.selectedSlot === null){ alert('Please select a time slot.'); return; }
+
+  const name  = document.getElementById('inp-name').value.trim();
+  const sid   = document.getElementById('inp-id').value.trim();
+  const email = document.getElementById('inp-email').value.trim();
+  const title = document.getElementById('inp-title').value.trim();
+  const desc  = document.getElementById('inp-desc').value.trim();
+
+  let valid = true;
+  [['fg-name',name],['fg-id',sid],['fg-title',title],['fg-desc',desc]].forEach(([id,val])=>{
+    const fg = document.getElementById(id);
+    if(!val){ fg.classList.add('error'); valid=false; } else { fg.classList.remove('error'); }
+  });
+  if(!valid) return;
+
+  const slot = state.slots[state.selectedSlot];
+  const btn  = document.getElementById('submit-btn');
+  btn.classList.add('loading'); btn.disabled=true;
+
+  const booking = {
+    id: Date.now(), slotId: slot.id, timeSlot: slot.label,
+    name, studentId: sid, email, title, description: desc,
+    bookedAt: now()
+  };
+
+  await sendToSheets({ type:'booking', timeSlot: slot.label, name, studentId: sid, email, title, description: desc, bookedAt: booking.bookedAt });
+
+  state.slots[state.selectedSlot].booked = true;
+  state.slots[state.selectedSlot].bookedBy = booking;
+  state.bookings.push(booking);
+  state.selectedSlot = null;
+
+  btn.classList.remove('loading'); btn.disabled=true;
+  renderSlots(); updateHeroBadge(); updateStats(); renderBookingsTable();
+
+  // Show success modal
+  document.getElementById('modal-summary').innerHTML = `
+    <div class="modal-summary-row"><span class="lbl">Time</span><span>${slot.label}</span></div>
+    <div class="modal-summary-row"><span class="lbl">Name</span><span>${name}</span></div>
+    <div class="modal-summary-row"><span class="lbl">ID</span><span>${sid}</span></div>
+    <div class="modal-summary-row"><span class="lbl">Title</span><span>${title}</span></div>`;
+  document.getElementById('success-modal').classList.add('visible');
+  document.getElementById('booking-form').reset();
+  document.getElementById('char-count').textContent='0 / 400';
+  document.getElementById('slot-display').classList.remove('has-slot');
+  document.getElementById('slot-display-time').textContent='No slot selected';
+});
+
+document.getElementById('modal-close').addEventListener('click',()=>document.getElementById('success-modal').classList.remove('visible'));
+document.getElementById('success-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('visible'); });
+
+// ─── SHEETS ──────────────────────────────────────────────────────────────────
+async function sendToSheets(data){
+  const url = state.config.sheetsUrl;
+  if(!url) return;
+  try{
+    // no-cors mode: Content-Type header is stripped by browser; body still sent correctly
+    await fetch(url,{ method:'POST', mode:'no-cors', body:JSON.stringify(data) });
+  }catch(e){ console.warn('Sheets error:', e); }
+}
+
+async function syncSettingsToSheets(){
+  const url = state.config.sheetsUrl;
+  if(!url){
+    showStatus('Settings saved locally. Add a Web App URL above to also sync to Google Sheets.','ok');
+    return;
+  }
+  const payload = {
+    type: 'settings',
+    savedAt:    now(),
+    date:       state.config.date,
+    course:     state.config.course,
+    startTime:  state.config.startTime,
+    endTime:    state.config.endTime,
+    breakStart: state.config.breakStart,
+    breakEnd:   state.config.breakEnd
+  };
+  try{
+    // no-cors strips custom Content-Type; Apps Script still receives body via e.postData.contents
+    await fetch(url,{ method:'POST', mode:'no-cors', body:JSON.stringify(payload) });
+    showStatus('\u2713 Settings saved & synced to Google Sheets (Session Settings tab).','ok');
+  }catch(e){
+    showStatus('Settings saved locally. Could not reach Google Sheets — check your URL.','err');
+  }
+}
+
+// ─── SAVE SETTINGS (btn-save-config) ─────────────────────────────────────────
+document.getElementById('btn-save-config').addEventListener('click', async ()=>{
+  // 1. Read ALL fields from DOM into state.config
+  const newPw = document.getElementById('cfg-admin-pw').value.trim();
+  if(newPw) state.config.adminPassword = newPw;
+
+  state.config.date       = document.getElementById('cfg-date').value.trim();
+  state.config.course     = document.getElementById('cfg-course').value.trim();
+  state.config.startTime  = document.getElementById('cfg-start').value.trim() || '09:00';
+  state.config.endTime    = document.getElementById('cfg-end').value.trim()   || '12:00';
+  state.config.breakStart = document.getElementById('cfg-break-start').value.trim();
+  state.config.breakEnd   = document.getElementById('cfg-break-end').value.trim();
+  state.config.sheetsUrl  = document.getElementById('cfg-sheets-url').value.trim();
+
+  document.getElementById('cfg-admin-pw').value = '';
+
+  // 2. Update UI
+  document.getElementById('session-date-label').textContent = state.config.date || 'Session date not set';
+  if(state.config.course) document.getElementById('brand-sub-text').textContent = state.config.course;
+
+  // 3. Sync to Sheets (always attempts if URL is set)
+  await syncSettingsToSheets();
+
+  // 4. Flash confirmation
+  flash('msg-saved');
+});
+
+// ─── GENERATE SLOTS ──────────────────────────────────────────────────────────
+document.getElementById('btn-generate-slots').addEventListener('click',()=>{
+  // Read session time fields into state.config before generating
+  state.config.startTime  = document.getElementById('cfg-start').value.trim() || '09:00';
+  state.config.endTime    = document.getElementById('cfg-end').value.trim()   || '12:00';
+  state.config.breakStart = document.getElementById('cfg-break-start').value.trim();
+  state.config.breakEnd   = document.getElementById('cfg-break-end').value.trim();
+  state.config.date       = document.getElementById('cfg-date').value.trim();
+  state.config.course     = document.getElementById('cfg-course').value.trim();
+  generateSlots();
+  document.getElementById('session-date-label').textContent = state.config.date || 'Session date not set';
+  if(state.config.course) document.getElementById('brand-sub-text').textContent = state.config.course;
+});
+
+// ─── TEST CONNECTION ─────────────────────────────────────────────────────────
+document.getElementById('btn-test-url').addEventListener('click', async ()=>{
+  const url = document.getElementById('cfg-sheets-url').value.trim();
+  if(!url){ showStatus('Please enter a Web App URL first.','err'); return; }
+  showStatus('Testing connection…','ok');
+  try{
+    const resp = await fetch(url,{ mode:'cors' });
+    const json = await resp.json();
+    showStatus(`✓ Connected — ${json.message||'API ready'}`, 'ok');
+  }catch(e){
+    // no-cors fallback — a network request that doesn't throw = URL is live
+    try{
+      await fetch(url,{ mode:'no-cors' });
+      showStatus('✓ URL reachable (CORS restricted — normal for Apps Script).','ok');
+    }catch(e2){
+      showStatus('✗ Cannot reach that URL. Check it is deployed and accessible.','err');
+    }
+  }
+});
+
+// ─── ADMIN STATS + TABLE ─────────────────────────────────────────────────────
+function updateStats(){
+  const total  = state.slots.length;
+  const booked = state.slots.filter(s=>s.booked).length;
+  document.getElementById('stat-total').textContent  = total;
+  document.getElementById('stat-booked').textContent = booked;
+  document.getElementById('stat-avail').textContent  = total - booked;
+  document.getElementById('stat-fill').textContent   = total ? Math.round(booked/total*100)+'%' : '0%';
+}
+
+function renderBookingsTable(){
+  const tbody = document.getElementById('bookings-tbody');
+  if(!state.bookings.length){
+    tbody.innerHTML=`<tr><td colspan="8"><div class="no-bookings"><i data-lucide="inbox" width="28" height="28"></i><p>No bookings yet.</p></div></td></tr>`;
+    lucide.createIcons(); return;
+  }
+  tbody.innerHTML = state.bookings.map((b,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td style="white-space:nowrap;font-variant-numeric:tabular-nums">${b.timeSlot}</td>
+      <td>${b.name}</td>
+      <td><code>${b.studentId}</code></td>
+      <td>${b.title}</td>
+      <td style="max-width:220px;word-break:break-word">${b.description}</td>
+      <td>${b.email||'—'}</td>
+      <td style="white-space:nowrap;color:var(--color-text-muted);font-size:var(--text-xs)">${b.bookedAt}</td>
+    </tr>`).join('');
+}
+
+// ─── EXPORT CSV ──────────────────────────────────────────────────────────────
+document.getElementById('btn-export').addEventListener('click',()=>{
+  if(!state.bookings.length){ alert('No bookings to export.'); return; }
+  const rows=[['#','Time Slot','Name','Student ID','Email','Project Title','Description','Booked At']];
+  state.bookings.forEach((b,i)=>rows.push([i+1,b.timeSlot,b.name,b.studentId,b.email||'',b.title,b.description,b.bookedAt]));
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`bookings-${Date.now()}.csv`; a.click();
+});
+
+document.getElementById('btn-clear').addEventListener('click',()=>{
+  if(!confirm('Clear ALL bookings? This cannot be undone.')) return;
+  state.bookings=[]; state.slots.forEach(s=>{s.booked=false;s.bookedBy=null;});
+  renderSlots(); updateHeroBadge(); updateStats(); renderBookingsTable();
+});
+
+// ─── ADMIN AUTH ──────────────────────────────────────────────────────────────
+function openAdminModal(){ document.getElementById('pw-modal').classList.add('visible'); setTimeout(()=>document.getElementById('pw-input').focus(),150); }
+function closeAdminModal(){ document.getElementById('pw-modal').classList.remove('visible'); document.getElementById('pw-input').value=''; document.getElementById('pw-error').style.display='none'; }
+
+function attemptLogin(){
+  const val = document.getElementById('pw-input').value;
+  if(val === state.config.adminPassword){
+    state.adminAuth = true;
+    closeAdminModal();
+    document.getElementById('admin-tabs').classList.add('visible');
+    document.getElementById('admin-badge').classList.add('visible');
+    document.getElementById('btn-open-admin').style.display='none';
+    switchPanel('admin');
+    populateSettingsFields();
+    updateStats(); renderBookingsTable();
+  } else {
+    document.getElementById('pw-error').style.display='block';
+    document.getElementById('pw-input').select();
+  }
+}
+
+function logoutAdmin(){
+  state.adminAuth = false;
+  document.getElementById('admin-tabs').classList.remove('visible');
+  document.getElementById('admin-badge').classList.remove('visible');
+  document.getElementById('btn-open-admin').style.display='';
+  switchPanel('book');
+}
+
+document.getElementById('btn-open-admin').addEventListener('click', openAdminModal);
+document.getElementById('pw-cancel').addEventListener('click', closeAdminModal);
+document.getElementById('pw-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeAdminModal(); });
+document.getElementById('pw-submit').addEventListener('click', attemptLogin);
+document.getElementById('pw-input').addEventListener('keydown', e=>{ if(e.key==='Enter') attemptLogin(); });
+document.getElementById('admin-badge').addEventListener('click', logoutAdmin);
+document.getElementById('pw-toggle').addEventListener('click',()=>{
+  const inp=document.getElementById('pw-input');
+  inp.type = inp.type==='password'?'text':'password';
+});
+
+// ─── PANEL SWITCHING ─────────────────────────────────────────────────────────
+function populateSettingsFields(){
+  document.getElementById('cfg-date').value        = state.config.date       || '';
+  document.getElementById('cfg-course').value      = state.config.course     || '';
+  document.getElementById('cfg-start').value       = state.config.startTime  || '09:00';
+  document.getElementById('cfg-end').value         = state.config.endTime    || '12:00';
+  document.getElementById('cfg-break-start').value = state.config.breakStart || '';
+  document.getElementById('cfg-break-end').value   = state.config.breakEnd   || '';
+  document.getElementById('cfg-sheets-url').value  = state.config.sheetsUrl  || '';
+  document.getElementById('cfg-admin-pw').value    = '';
+}
+
+function switchPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelectorAll('.admin-tab').forEach(t=>{
+    t.classList.toggle('active', t.dataset.panel===name);
+    t.setAttribute('aria-selected', t.dataset.panel===name);
+  });
+  if(name === 'config') populateSettingsFields();
+}
+
+document.querySelectorAll('.admin-tab').forEach(t=>t.addEventListener('click',()=>{
+  if(!state.adminAuth) return;
+  switchPanel(t.dataset.panel);
+}));
+
+// ─── MISC ────────────────────────────────────────────────────────────────────
+document.getElementById('inp-desc').addEventListener('input',function(){
+  document.getElementById('char-count').textContent=`${this.value.length} / 400`;
+});
+
+function copyScript(){
+  const code = document.getElementById('apps-script-pre').textContent;
+  navigator.clipboard.writeText(code).then(()=>alert('Script copied to clipboard!')).catch(()=>alert('Please select and copy the script text manually.'));
+}
+
+// ─── DARK MODE TOGGLE ────────────────────────────────────────────────────────
+(function(){
+  const root=document.documentElement;
+  const btn=document.getElementById('theme-toggle');
+  let dark=matchMedia('(prefers-color-scheme:dark)').matches;
+  function setTheme(d){
+    dark=d; root.setAttribute('data-theme',d?'dark':'light');
+    btn.innerHTML=d?'<i data-lucide="sun" width="16" height="16"></i>':'<i data-lucide="moon" width="16" height="16"></i>';
+    lucide.createIcons();
+  }
+  setTheme(dark);
+  btn.addEventListener('click',()=>setTheme(!dark));
+})();
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+lucide.createIcons();
+// Auto-generate default slots so students see the grid immediately
+if(state.config.startTime && state.config.endTime) generateSlots();
+renderSlots();
+updateHeroBadge();
+updateStats();
+renderBookingsTable();
+</script>
+</body>
+</html>
