@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PresentSlot – Class Presentation Booking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+/* ── DESIGN TOKENS ── */
+:root,[data-theme="light"]{
+  --color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;
+  --color-surface-offset:#f3f0ec;--color-surface-offset-2:#edeae5;
+  --color-surface-dynamic:#e6e4df;--color-divider:#dcd9d5;--color-border:#d4d1ca;
+  --color-text:#28251d;--color-text-muted:#7a7974;--color-text-faint:#bab9b4;
+  --color-text-inverse:#f9f8f4;
+  --color-primary:#01696f;--color-primary-hover:#0c4e54;--color-primary-active:#0f3638;
+  --color-primary-highlight:#cedcd8;
+  --color-success:#437a22;--color-success-hover:#2e5c10;--color-success-highlight:#d4dfcc;
+  --color-error:#a12c7b;--color-error-hover:#7d1e5e;--color-error-highlight:#e0ced7;
+  --color-warning:#964219;--color-warning-highlight:#ddcfc6;
+  --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --shadow-sm:0 1px 2px oklch(0.2 0.01 80/.06);--shadow-md:0 4px 12px oklch(0.2 0.01 80/.08);
+  --shadow-lg:0 12px 32px oklch(0.2 0.01 80/.12);
+  --transition-interactive:180ms cubic-bezier(0.16,1,0.3,1);
+  --font-display:'Instrument Serif',Georgia,serif;
+  --font-body:'Inter','Helvetica Neue',sans-serif;
+  --text-xs:clamp(.75rem,.7rem + .25vw,.875rem);
+  --text-sm:clamp(.875rem,.8rem + .35vw,1rem);
+  --text-base:clamp(1rem,.95rem + .25vw,1.125rem);
+  --text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);
+  --text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);
+  --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.25rem;
+  --space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;
+  --content-narrow:640px;--content-default:960px;
+}
+[data-theme="dark"]{
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-surface-offset-2:#22211f;
+  --color-surface-dynamic:#2d2c2a;--color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;
+  --color-text-inverse:#2b2a28;
+  --color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-active:#1a626b;
+  --color-primary-highlight:#313b3b;
+  --color-success:#6daa45;--color-success-hover:#4d8f25;--color-success-highlight:#3a4435;
+  --color-error:#d163a7;--color-error-hover:#b9478f;--color-error-highlight:#4c3d46;
+  --color-warning:#bb653b;--color-warning-highlight:#564942;
+  --shadow-sm:0 1px 2px oklch(0 0 0/.2);--shadow-md:0 4px 12px oklch(0 0 0/.3);
+  --shadow-lg:0 12px 32px oklch(0 0 0/.4);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-border:#393836;--color-divider:#262523;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;
+  --color-text-inverse:#2b2a28;--color-primary:#4f98a3;--color-primary-hover:#227f8b;
+  --color-primary-active:#1a626b;--color-primary-highlight:#313b3b;
+  --color-success:#6daa45;--color-success-highlight:#3a4435;
+  --color-error:#d163a7;--color-error-highlight:#4c3d46;
+  --shadow-sm:0 1px 2px oklch(0 0 0/.2);--shadow-md:0 4px 12px oklch(0 0 0/.3);
+  --shadow-lg:0 12px 32px oklch(0 0 0/.4);
+}}
+
+/* ── BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);
+  color:var(--color-text);background:var(--color-bg);line-height:1.6}
+img,svg{display:block;max-width:100%}
+input,button,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none}
+h1,h2,h3,h4{text-wrap:balance;line-height:1.15}
+p,li{text-wrap:pretty;max-width:72ch}
+::selection{background:oklch(from var(--color-primary) l c h/.25);color:var(--color-text)}
+:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-sm)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{
+  animation-duration:.01ms!important;transition-duration:.01ms!important}}
+a,button,[role="button"],input,textarea,select{
+  transition:color var(--transition-interactive),background var(--transition-interactive),
+  border-color var(--transition-interactive),box-shadow var(--transition-interactive)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+/* ── LAYOUT ── */
+.app-shell{display:flex;flex-direction:column;min-height:100dvh}
+.app-header{position:sticky;top:0;z-index:50;background:var(--color-surface);
+  border-bottom:1px solid var(--color-divider);padding:var(--space-3) var(--space-6)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;
+  max-width:var(--content-default);margin-inline:auto;gap:var(--space-4)}
+.logo{display:flex;align-items:center;gap:var(--space-2);text-decoration:none;color:var(--color-text)}
+.logo-mark{width:32px;height:32px;color:var(--color-primary)}
+.logo-name{font-family:var(--font-display);font-size:var(--text-lg);font-style:italic}
+.header-actions{display:flex;align-items:center;gap:var(--space-2)}
+.icon-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;
+  border-radius:var(--radius-md);color:var(--color-text-muted)}
+.icon-btn:hover{background:var(--color-surface-offset);color:var(--color-text)}
+.admin-badge{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) var(--space-3);
+  background:var(--color-primary-highlight);color:var(--color-primary);
+  border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:500}
+.admin-signout{font-size:var(--text-xs);color:var(--color-text-muted);text-decoration:underline;
+  background:none;border:none;cursor:pointer;padding:0}
+.admin-signout:hover{color:var(--color-text)}
+.tab-nav{display:flex;border-bottom:1px solid var(--color-divider);
+  background:var(--color-surface);padding:0 var(--space-6)}
+.tab-nav-inner{display:flex;gap:0;max-width:var(--content-default);margin-inline:auto}
+.tab-btn{padding:var(--space-3) var(--space-5);font-size:var(--text-sm);font-weight:500;
+  color:var(--color-text-muted);border-bottom:2px solid transparent;margin-bottom:-1px;
+  white-space:nowrap}
+.tab-btn:hover{color:var(--color-text)}
+.tab-btn.active{color:var(--color-primary);border-bottom-color:var(--color-primary)}
+.main-content{flex:1;padding:var(--space-8) var(--space-6);
+  max-width:var(--content-default);margin-inline:auto;width:100%}
+
+/* ── LOADING STATE ── */
+.loading-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:var(--space-4);padding:var(--space-16);text-align:center}
+.spinner{width:32px;height:32px;border:3px solid var(--color-surface-dynamic);
+  border-top-color:var(--color-primary);border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--color-text-muted);font-size:var(--text-sm)}
+.config-needed{display:flex;flex-direction:column;align-items:center;gap:var(--space-4);
+  padding:var(--space-12);text-align:center;background:var(--color-surface);
+  border-radius:var(--radius-xl);border:1px solid var(--color-border)}
+.config-needed svg{color:var(--color-text-faint);margin-bottom:var(--space-2)}
+.config-needed h3{font-size:var(--text-lg);margin-bottom:var(--space-1)}
+.config-needed p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:44ch}
+
+/* ── BOOKING VIEW ── */
+.session-banner{background:var(--color-primary-highlight);color:var(--color-primary);
+  padding:var(--space-3) var(--space-4);border-radius:var(--radius-lg);
+  margin-bottom:var(--space-6);display:flex;align-items:center;gap:var(--space-3);
+  font-size:var(--text-sm);font-weight:500}
+.session-banner svg{flex-shrink:0}
+.booking-layout{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-8);align-items:start}
+@media(max-width:680px){.booking-layout{grid-template-columns:1fr}}
+.section-title{font-size:var(--text-lg);font-weight:600;margin-bottom:var(--space-4)}
+.section-sub{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4)}
+
+/* ── SLOTS ── */
+.slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:var(--space-2)}
+.slot-btn{padding:var(--space-2) var(--space-2);border-radius:var(--radius-md);
+  font-size:var(--text-xs);font-weight:500;text-align:center;
+  border:1px solid var(--color-border);background:var(--color-surface);
+  color:var(--color-text);transition:all var(--transition-interactive)}
+.slot-btn:hover:not(:disabled){background:var(--color-primary-highlight);
+  border-color:var(--color-primary);color:var(--color-primary)}
+.slot-btn.selected{background:var(--color-primary);border-color:var(--color-primary);
+  color:var(--color-text-inverse);box-shadow:var(--shadow-sm)}
+.slot-btn.taken{background:var(--color-surface-offset);color:var(--color-text-faint);
+  border-color:var(--color-divider);cursor:not-allowed;text-decoration:line-through}
+.slot-btn:disabled{cursor:not-allowed;opacity:.5}
+.slots-legend{display:flex;gap:var(--space-4);margin-top:var(--space-3);flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:var(--space-1);
+  font-size:var(--text-xs);color:var(--color-text-muted)}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+.legend-dot.open{background:var(--color-surface);border:1px solid var(--color-border)}
+.legend-dot.selected{background:var(--color-primary)}
+.legend-dot.taken{background:var(--color-surface-dynamic)}
+
+/* ── FORM ── */
+.booking-form{background:var(--color-surface);border:1px solid var(--color-border);
+  border-radius:var(--radius-xl);padding:var(--space-6);box-shadow:var(--shadow-sm)}
+.form-group{margin-bottom:var(--space-5)}
+.form-label{display:block;font-size:var(--text-sm);font-weight:500;margin-bottom:var(--space-2)}
+.form-label .req{color:var(--color-error);margin-left:2px}
+.form-input,.form-textarea{width:100%;padding:var(--space-2) var(--space-3);
+  border:1px solid var(--color-border);border-radius:var(--radius-md);
+  background:var(--color-surface-2);font-size:var(--text-sm);
+  transition:border-color var(--transition-interactive),box-shadow var(--transition-interactive)}
+.form-input:focus,.form-textarea:focus{outline:none;border-color:var(--color-primary);
+  box-shadow:0 0 0 3px oklch(from var(--color-primary) l c h/.15)}
+.form-textarea{resize:vertical;min-height:90px;line-height:1.5}
+.char-count{font-size:var(--text-xs);color:var(--color-text-faint);text-align:right;margin-top:var(--space-1)}
+.form-error{font-size:var(--text-xs);color:var(--color-error);margin-top:var(--space-1)}
+.selected-slot-display{padding:var(--space-2) var(--space-3);background:var(--color-primary-highlight);
+  color:var(--color-primary);border-radius:var(--radius-md);font-size:var(--text-sm);
+  font-weight:500;margin-bottom:var(--space-4);display:flex;align-items:center;gap:var(--space-2)}
+.no-slot-msg{padding:var(--space-2) var(--space-3);background:var(--color-surface-offset);
+  color:var(--color-text-muted);border-radius:var(--radius-md);font-size:var(--text-sm);
+  margin-bottom:var(--space-4)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-5);
+  border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:500;
+  transition:all var(--transition-interactive);white-space:nowrap}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse)}
+.btn-primary:hover:not(:disabled){background:var(--color-primary-hover)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:var(--color-surface);color:var(--color-text);
+  border:1px solid var(--color-border)}
+.btn-secondary:hover{background:var(--color-surface-offset)}
+.btn-danger{background:var(--color-surface);color:var(--color-error);
+  border:1px solid var(--color-border)}
+.btn-danger:hover{background:var(--color-error-highlight)}
+.btn-full{width:100%;justify-content:center}
+.btn-sm{padding:var(--space-1) var(--space-3);font-size:var(--text-xs)}
+
+/* ── ADMIN TABS ── */
+.admin-section h2{font-size:var(--text-xl);font-weight:600;margin-bottom:var(--space-6)}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:var(--space-4);margin-bottom:var(--space-8)}
+.stat-card{background:var(--color-surface);border:1px solid var(--color-border);
+  border-radius:var(--radius-lg);padding:var(--space-4)}
+.stat-label{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-1);
+  text-transform:uppercase;letter-spacing:.04em}
+.stat-value{font-size:var(--text-xl);font-weight:700;color:var(--color-primary);
+  font-variant-numeric:tabular-nums}
+.table-wrapper{overflow-x:auto;border-radius:var(--radius-lg);
+  border:1px solid var(--color-border)}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--color-surface-offset);padding:var(--space-3) var(--space-4);
+  text-align:left;font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);
+  text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--color-border)}
+tbody tr{border-bottom:1px solid var(--color-divider)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:var(--space-3) var(--space-4);font-size:var(--text-sm);vertical-align:top}
+tbody tr:hover{background:var(--color-surface-offset)}
+.empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:var(--space-16) var(--space-8);color:var(--color-text-muted)}
+.empty-state svg{margin-bottom:var(--space-4);color:var(--color-text-faint)}
+.empty-state h3{color:var(--color-text);margin-bottom:var(--space-2)}
+.table-actions{display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:var(--space-4);flex-wrap:wrap;gap:var(--space-3)}
+
+/* ── SETTINGS ── */
+.settings-card{background:var(--color-surface);border:1px solid var(--color-border);
+  border-radius:var(--radius-xl);padding:var(--space-6);margin-bottom:var(--space-6);
+  box-shadow:var(--shadow-sm)}
+.settings-card h3{font-size:var(--text-base);font-weight:600;margin-bottom:var(--space-4);
+  padding-bottom:var(--space-3);border-bottom:1px solid var(--color-divider)}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+@media(max-width:480px){.form-grid-2{grid-template-columns:1fr}}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-4)}
+@media(max-width:600px){.form-grid-3{grid-template-columns:1fr 1fr}}
+.settings-actions{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-4)}
+.script-box{background:var(--color-surface-offset);border:1px solid var(--color-border);
+  border-radius:var(--radius-md);padding:var(--space-4);margin-top:var(--space-3)}
+.script-pre{font-family:monospace;font-size:11px;white-space:pre-wrap;word-break:break-all;
+  color:var(--color-text-muted);max-height:220px;overflow-y:auto;line-height:1.5}
+.script-toggle{font-size:var(--text-xs);color:var(--color-primary);background:none;border:none;
+  cursor:pointer;padding:0;display:flex;align-items:center;gap:var(--space-1);margin-top:var(--space-3)}
+.badge{display:inline-flex;align-items:center;padding:2px var(--space-2);
+  border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:500}
+.badge-warning{background:var(--color-warning-highlight);color:var(--color-warning)}
+.help-text{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-1)}
+.status-banner{padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);
+  font-size:var(--text-sm);display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-3)}
+.status-success{background:var(--color-success-highlight);color:var(--color-success)}
+.status-error{background:var(--color-error-highlight);color:var(--color-error)}
+.status-info{background:var(--color-primary-highlight);color:var(--color-primary)}
+
+/* ── MODAL ── */
+.modal-backdrop{position:fixed;inset:0;background:oklch(.1 0 0/.5);
+  display:flex;align-items:center;justify-content:center;z-index:100;padding:var(--space-4);
+  animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--color-surface);border-radius:var(--radius-xl);
+  padding:var(--space-8);max-width:440px;width:100%;box-shadow:var(--shadow-lg);
+  animation:slideUp .2s cubic-bezier(0.16,1,0.3,1)}
+@keyframes slideUp{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.modal h2{font-size:var(--text-lg);font-weight:600;margin-bottom:var(--space-4)}
+.modal-actions{display:flex;gap:var(--space-3);justify-content:flex-end;margin-top:var(--space-6)}
+.confirm-detail{background:var(--color-surface-offset);border-radius:var(--radius-lg);
+  padding:var(--space-4);margin-bottom:var(--space-4)}
+.confirm-row{display:flex;gap:var(--space-2);margin-bottom:var(--space-2);font-size:var(--text-sm)}
+.confirm-row:last-child{margin-bottom:0}
+.confirm-label{color:var(--color-text-muted);flex-shrink:0;min-width:80px}
+.confirm-val{font-weight:500;word-break:break-word}
+.pw-input-wrap{position:relative}
+.pw-toggle{position:absolute;right:var(--space-2);top:50%;transform:translateY(-50%);
+  color:var(--color-text-faint)}
+.pw-toggle:hover{color:var(--color-text)}
+</style>
+</head>
+<body>
+<a href="#main" class="sr-only">Skip to content</a>
+
+<div class="app-shell">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="#" class="logo" aria-label="PresentSlot home">
+        <svg class="logo-mark" aria-hidden="true" viewBox="0 0 32 32" fill="none">
+          <rect x="3" y="4" width="26" height="22" rx="3" stroke="currentColor" stroke-width="2"/>
+          <path d="M3 10h26" stroke="currentColor" stroke-width="2"/>
+          <circle cx="8" cy="7" r="1.5" fill="currentColor"/>
+          <circle cx="13" cy="7" r="1.5" fill="currentColor"/>
+          <path d="M13 16l5 3-5 3V16z" fill="currentColor"/>
+        </svg>
+        <span class="logo-name">PresentSlot</span>
+      </a>
+      <div class="header-actions">
+        <div id="adminBadge" style="display:none" class="admin-badge">
+          <i data-lucide="shield-check" style="width:14px;height:14px"></i>
+          Admin
+          <button class="admin-signout" onclick="signOutAdmin()">Sign out</button>
+        </div>
+        <button id="adminLockBtn" class="icon-btn" aria-label="Admin login" onclick="openAdminLogin()" title="Admin access">
+          <i data-lucide="lock" style="width:18px;height:18px"></i>
+        </button>
+        <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+          <i data-lucide="sun" style="width:18px;height:18px"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TAB NAV (admin only tabs hidden by default) -->
+  <nav class="tab-nav" aria-label="App sections">
+    <div class="tab-nav-inner">
+      <button class="tab-btn active" data-tab="book" onclick="switchTab('book')">Book a Slot</button>
+      <button class="tab-btn admin-tab" data-tab="bookings" onclick="switchTab('bookings')" style="display:none">Bookings</button>
+      <button class="tab-btn admin-tab" data-tab="settings" onclick="switchTab('settings')" style="display:none">Settings</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main id="main" class="main-content">
+
+    <!-- ══ BOOK TAB ══ -->
+    <div id="tab-book">
+      <div id="bookingLoadState">
+        <div class="loading-overlay">
+          <div class="spinner"></div>
+          <p class="loading-text">Loading session details…</p>
+        </div>
+      </div>
+      <div id="bookingContent" style="display:none">
+        <div id="sessionBanner" class="session-banner">
+          <i data-lucide="calendar" style="width:16px;height:16px"></i>
+          <span id="bannerText">Loading…</span>
+        </div>
+        <div class="booking-layout">
+          <div>
+            <h2 class="section-title">Choose a time slot</h2>
+            <p class="section-sub">Each slot is 5 minutes. Select one to proceed.</p>
+            <div id="slotsGrid" class="slots-grid" role="group" aria-label="Available time slots"></div>
+            <div class="slots-legend">
+              <span class="legend-item"><span class="legend-dot open"></span> Available</span>
+              <span class="legend-item"><span class="legend-dot selected"></span> Selected</span>
+              <span class="legend-item"><span class="legend-dot taken"></span> Taken</span>
+            </div>
+          </div>
+          <div>
+            <div class="booking-form">
+              <div id="selectedSlotDisplay" class="no-slot-msg">
+                ← Pick a time slot on the left
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="studentName">Full Name <span class="req">*</span></label>
+                <input class="form-input" type="text" id="studentName" placeholder="e.g. Jane Smith" autocomplete="name">
+                <div class="form-error" id="err-name"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="studentId">Student ID <span class="req">*</span></label>
+                <input class="form-input" type="text" id="studentId" placeholder="e.g. u1234567">
+                <div class="form-error" id="err-id"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="studentEmail">Email <span style="color:var(--color-text-muted);font-weight:400">(optional)</span></label>
+                <input class="form-input" type="email" id="studentEmail" placeholder="you@example.com" autocomplete="email">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="projectTitle">Project Title <span class="req">*</span></label>
+                <input class="form-input" type="text" id="projectTitle" placeholder="e.g. AI in Healthcare Design">
+                <div class="form-error" id="err-title"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="projectDesc">Brief Description <span class="req">*</span></label>
+                <textarea class="form-textarea" id="projectDesc" maxlength="400" placeholder="Describe your project in a few sentences…" oninput="updateCharCount()"></textarea>
+                <div class="char-count"><span id="charCount">0</span>/400</div>
+                <div class="form-error" id="err-desc"></div>
+              </div>
+              <button class="btn btn-primary btn-full" id="submitBtn" onclick="submitBooking()" disabled>
+                <i data-lucide="check" style="width:16px;height:16px"></i>
+                Confirm Booking
+              </button>
+              <p id="submitMsg" style="margin-top:var(--space-3);font-size:var(--text-xs);text-align:center"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="configNeeded" style="display:none" class="config-needed">
+        <i data-lucide="settings" style="width:40px;height:40px"></i>
+        <h3>No session configured yet</h3>
+        <p>An admin needs to configure the session settings and connect a Google Sheets URL before students can book slots.</p>
+      </div>
+    </div>
+
+    <!-- ══ BOOKINGS TAB ══ -->
+    <div id="tab-bookings" class="admin-section" style="display:none">
+      <h2>Bookings</h2>
+      <div id="statsRow" class="stats-row"></div>
+      <div class="table-actions">
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted)">
+          <span id="bookingCount">0</span> booking(s) recorded
+        </p>
+        <div style="display:flex;gap:var(--space-2)">
+          <button class="btn btn-secondary btn-sm" onclick="exportCSV()">
+            <i data-lucide="download" style="width:14px;height:14px"></i> Export CSV
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="confirmClearAll()">
+            <i data-lucide="trash-2" style="width:14px;height:14px"></i> Clear All
+          </button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Time Slot</th><th>Name</th><th>Student ID</th>
+              <th>Email</th><th>Project Title</th><th>Description</th><th>Booked At</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTableBody"></tbody>
+        </table>
+        <div id="bookingsEmpty" class="empty-state">
+          <i data-lucide="calendar-x" style="width:40px;height:40px"></i>
+          <h3>No bookings yet</h3>
+          <p>Bookings will appear here once students start reserving slots.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS TAB ══ -->
+    <div id="tab-settings" class="admin-section" style="display:none">
+      <h2>Settings</h2>
+
+      <!-- Google Sheets -->
+      <div class="settings-card">
+        <h3>Google Sheets Integration</h3>
+        <div class="form-group">
+          <label class="form-label" for="sheetsUrl">Apps Script Web App URL</label>
+          <input class="form-input" type="url" id="sheetsUrl" placeholder="https://script.google.com/macros/s/…/exec">
+          <p class="help-text">⚠️ This URL is the source of truth. All visitors load session config from here on page open.</p>
+        </div>
+        <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="testSheetsConnection()">
+            <i data-lucide="wifi" style="width:14px;height:14px"></i> Test Connection
+          </button>
+        </div>
+        <div id="connectionStatus"></div>
+        <button class="script-toggle" onclick="toggleScript()">
+          <i data-lucide="code-2" style="width:14px;height:14px"></i>
+          <span id="scriptToggleLabel">Show Apps Script code</span>
+        </button>
+        <div id="scriptBox" class="script-box" style="display:none">
+          <pre class="script-pre" id="scriptPre"></pre>
+          <button class="btn btn-secondary btn-sm" style="margin-top:var(--space-3)" onclick="copyScript()">
+            <i data-lucide="copy" style="width:14px;height:14px"></i> Copy script
+          </button>
+        </div>
+      </div>
+
+      <!-- Session Config -->
+      <div class="settings-card">
+        <h3>Session Configuration</h3>
+        <div class="form-grid-2" style="margin-bottom:var(--space-4)">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="sessionDate">Session Date</label>
+            <input class="form-input" type="date" id="sessionDate">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="courseCode">Course / Unit Code</label>
+            <input class="form-input" type="text" id="courseCode" placeholder="e.g. DESN3001">
+          </div>
+        </div>
+        <div class="form-grid-3" style="margin-bottom:var(--space-4)">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="startTime">Start Time</label>
+            <input class="form-input" type="time" id="startTime">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="endTime">End Time</label>
+            <input class="form-input" type="time" id="endTime">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="slotDuration">Slot Duration (min)</label>
+            <input class="form-input" type="number" id="slotDuration" value="5" min="1" max="60">
+          </div>
+        </div>
+        <div class="form-grid-2" style="margin-bottom:var(--space-4)">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="breakStart">Break Start <span style="font-weight:400;color:var(--color-text-muted)">(optional)</span></label>
+            <input class="form-input" type="time" id="breakStart">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="breakEnd">Break End <span style="font-weight:400;color:var(--color-text-muted)">(optional)</span></label>
+            <input class="form-input" type="time" id="breakEnd">
+          </div>
+        </div>
+        <div class="settings-actions">
+          <button class="btn btn-primary" onclick="saveSettings()">
+            <i data-lucide="save" style="width:16px;height:16px"></i> Save & Push to Sheets
+          </button>
+          <button class="btn btn-secondary" onclick="regenerateSlots()">
+            <i data-lucide="refresh-cw" style="width:16px;height:16px"></i> Preview Slots
+          </button>
+        </div>
+        <div id="settingsStatus"></div>
+      </div>
+
+      <!-- Admin Password -->
+      <div class="settings-card">
+        <h3>Admin Password</h3>
+        <div class="form-group">
+          <label class="form-label" for="newPassword">New Password</label>
+          <div class="pw-input-wrap">
+            <input class="form-input" type="password" id="newPassword" placeholder="Enter new password" style="padding-right:2.5rem">
+            <button class="pw-toggle icon-btn" onclick="togglePwVis('newPassword')" aria-label="Show/hide password">
+              <i data-lucide="eye" style="width:16px;height:16px"></i>
+            </button>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="changePassword()">
+          <i data-lucide="key" style="width:16px;height:16px"></i> Update Password
+        </button>
+        <div id="pwStatus"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Admin Login Modal -->
+<div id="adminModal" class="modal-backdrop" style="display:none" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+  <div class="modal">
+    <h2 id="adminModalTitle">Admin Access</h2>
+    <p style="color:var(--color-text-muted);font-size:var(--text-sm);margin-bottom:var(--space-5)">
+      Enter your admin password to access settings and bookings.
+    </p>
+    <div class="form-group">
+      <label class="form-label" for="adminPwInput">Password</label>
+      <div class="pw-input-wrap">
+        <input class="form-input" type="password" id="adminPwInput" placeholder="Admin password"
+          onkeydown="if(event.key==='Enter')verifyAdmin()" style="padding-right:2.5rem">
+        <button class="pw-toggle icon-btn" onclick="togglePwVis('adminPwInput')" aria-label="Show/hide">
+          <i data-lucide="eye" style="width:16px;height:16px"></i>
+        </button>
+      </div>
+      <div class="form-error" id="adminPwError"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeAdminModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="verifyAdmin()">
+        <i data-lucide="unlock" style="width:16px;height:16px"></i> Unlock
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="modal-backdrop" style="display:none" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="modal">
+    <h2 id="confirmTitle">Confirm Booking</h2>
+    <div class="confirm-detail" id="confirmDetail"></div>
+    <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-2)">
+      Once confirmed, your slot is reserved. Please arrive on time.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeConfirmModal()">Back</button>
+      <button class="btn btn-primary" id="confirmFinalBtn" onclick="finaliseBooking()">
+        <i data-lucide="check-circle" style="width:16px;height:16px"></i> Confirm
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="modal-backdrop" style="display:none" role="dialog" aria-modal="true">
+  <div class="modal" style="text-align:center">
+    <div style="width:56px;height:56px;background:var(--color-success-highlight);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-4)">
+      <i data-lucide="check-circle" style="width:28px;height:28px;color:var(--color-success)"></i>
+    </div>
+    <h2 style="margin-bottom:var(--space-2)">Booking Confirmed!</h2>
+    <p style="color:var(--color-text-muted);font-size:var(--text-sm);margin-bottom:var(--space-6)" id="successMsg"></p>
+    <button class="btn btn-primary btn-full" onclick="closeSuccessModal()">Done</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let adminPassword = 'admin1234';
+let isAdmin = false;
+let sheetsUrl = '';
+let sessionConfig = null; // loaded from Sheets
+let slots = [];           // {time, taken}
+let selectedSlot = null;
+let bookings = [];
+let pendingBooking = null;
+
+// ══════════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════════
+(function(){
+  const t = document.querySelector('[data-theme-toggle]');
+  const r = document.documentElement;
+  let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  r.setAttribute('data-theme', d);
+  updateThemeIcon(d);
+  t && t.addEventListener('click', () => {
+    d = d === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', d);
+    updateThemeIcon(d);
+  });
+  function updateThemeIcon(mode) {
+    const btn = document.querySelector('[data-theme-toggle]');
+    if (!btn) return;
+    btn.innerHTML = mode === 'dark'
+      ? '<i data-lucide="sun" style="width:18px;height:18px"></i>'
+      : '<i data-lucide="moon" style="width:18px;height:18px"></i>';
+    lucide.createIcons();
+  }
+})();
+
+// ══════════════════════════════════════════════
+// INIT — fetch config from Sheets on every page load
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  loadSheetsUrlFromHash(); // allow url?sheets=... shortcut
+  fetchConfigFromSheets();
+  populateScript();
+});
+
+function loadSheetsUrlFromHash() {
+  // Allow ?sheets=URL as a convenience link so you can embed the URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('sheets')) {
+    sheetsUrl = decodeURIComponent(params.get('sheets'));
+  }
+}
+
+async function fetchConfigFromSheets() {
+  // 1. If no sheetsUrl stored, show config-needed
+  if (!sheetsUrl) {
+    showConfigNeeded();
+    return;
+  }
+
+  // 2. Try to fetch session config (type=getConfig)
+  try {
+    const url = `${sheetsUrl}?type=getConfig&_t=${Date.now()}`;
+    const resp = await fetch(url);
+    const text = await resp.text();
+    let data;
+    try { data = JSON.parse(text); } catch(e) {
+      // no-cors mode returns opaque — fall back to local defaults
+      showConfigNeeded();
+      return;
+    }
+    if (data && data.config) {
+      sessionConfig = data.config;
+      if (data.bookings) bookings = data.bookings;
+      buildSlotsFromConfig(sessionConfig);
+      // Mark taken slots from bookings
+      bookings.forEach(b => {
+        const s = slots.find(x => x.time === b.slot);
+        if (s) s.taken = true;
+      });
+      renderBookingView();
+    } else {
+      showConfigNeeded();
+    }
+  } catch(e) {
+    // Network error — try no-cors graceful degradation
+    showConfigNeeded();
+  }
+}
+
+function showConfigNeeded() {
+  document.getElementById('bookingLoadState').style.display = 'none';
+  document.getElementById('bookingContent').style.display = 'none';
+  document.getElementById('configNeeded').style.display = 'flex';
+}
+
+// ══════════════════════════════════════════════
+// SLOT GENERATION
+// ══════════════════════════════════════════════
+function buildSlotsFromConfig(cfg) {
+  slots = [];
+  if (!cfg.startTime || !cfg.endTime) return;
+  const dur = parseInt(cfg.slotDuration) || 5;
+  let cur = timeToMins(cfg.startTime);
+  const end = timeToMins(cfg.endTime);
+  const bkS = cfg.breakStart ? timeToMins(cfg.breakStart) : null;
+  const bkE = cfg.breakEnd   ? timeToMins(cfg.breakEnd)   : null;
+  while (cur + dur <= end) {
+    const isBreak = (bkS !== null && bkE !== null) && (cur >= bkS && cur < bkE);
+    if (!isBreak) slots.push({ time: minsToTime(cur), taken: false });
+    cur += dur;
+  }
+}
+
+function timeToMins(t) {
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+function minsToTime(m) {
+  return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+}
+
+// ══════════════════════════════════════════════
+// RENDER BOOKING VIEW
+// ══════════════════════════════════════════════
+function renderBookingView() {
+  document.getElementById('bookingLoadState').style.display = 'none';
+  document.getElementById('configNeeded').style.display = 'none';
+  document.getElementById('bookingContent').style.display = 'block';
+
+  const cfg = sessionConfig;
+  const dateStr = cfg.date ? new Date(cfg.date + 'T12:00:00').toLocaleDateString('en-AU', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '';
+  document.getElementById('bannerText').textContent =
+    `${cfg.course ? cfg.course + ' · ' : ''}${dateStr} · ${cfg.startTime} – ${cfg.endTime}`;
+
+  renderSlots();
+  lucide.createIcons();
+}
+
+function renderSlots() {
+  const grid = document.getElementById('slotsGrid');
+  grid.innerHTML = '';
+  slots.forEach(slot => {
+    const btn = document.createElement('button');
+    btn.className = 'slot-btn' + (slot.taken ? ' taken' : '') + (selectedSlot === slot.time && !slot.taken ? ' selected' : '');
+    btn.textContent = slot.time;
+    btn.disabled = slot.taken;
+    btn.setAttribute('aria-label', slot.time + (slot.taken ? ' (taken)' : ' (available)'));
+    btn.addEventListener('click', () => selectSlot(slot.time));
+    grid.appendChild(btn);
+  });
+}
+
+function selectSlot(time) {
+  const slot = slots.find(s => s.time === time);
+  if (!slot || slot.taken) return;
+  selectedSlot = selectedSlot === time ? null : time;
+  renderSlots();
+  updateSlotDisplay();
+  document.getElementById('submitBtn').disabled = !selectedSlot;
+  lucide.createIcons();
+}
+
+function updateSlotDisplay() {
+  const el = document.getElementById('selectedSlotDisplay');
+  if (selectedSlot) {
+    el.className = 'selected-slot-display';
+    el.innerHTML = `<i data-lucide="clock" style="width:15px;height:15px"></i> Selected: <strong>${selectedSlot}</strong>`;
+    lucide.createIcons();
+  } else {
+    el.className = 'no-slot-msg';
+    el.innerHTML = '← Pick a time slot on the left';
+  }
+}
+
+function updateCharCount() {
+  const v = document.getElementById('projectDesc').value.length;
+  document.getElementById('charCount').textContent = v;
+}
+
+// ══════════════════════════════════════════════
+// BOOKING SUBMISSION
+// ══════════════════════════════════════════════
+function submitBooking() {
+  const name  = document.getElementById('studentName').value.trim();
+  const sid   = document.getElementById('studentId').value.trim();
+  const email = document.getElementById('studentEmail').value.trim();
+  const title = document.getElementById('projectTitle').value.trim();
+  const desc  = document.getElementById('projectDesc').value.trim();
+
+  let valid = true;
+  [['err-name', name, 'Full name is required'],
+   ['err-id',   sid,  'Student ID is required'],
+   ['err-title',title,'Project title is required'],
+   ['err-desc', desc, 'Description is required']
+  ].forEach(([id, val, msg]) => {
+    const el = document.getElementById(id);
+    if (!val) { el.textContent = msg; valid = false; }
+    else el.textContent = '';
+  });
+  if (!selectedSlot) { alert('Please select a time slot.'); return; }
+  if (!valid) return;
+
+  pendingBooking = { name, sid, email, title, desc, slot: selectedSlot };
+
+  const detail = document.getElementById('confirmDetail');
+  detail.innerHTML = `
+    <div class="confirm-row"><span class="confirm-label">Slot</span><span class="confirm-val">${selectedSlot} · ${sessionConfig.date || ''}</span></div>
+    <div class="confirm-row"><span class="confirm-label">Name</span><span class="confirm-val">${name}</span></div>
+    <div class="confirm-row"><span class="confirm-label">Student ID</span><span class="confirm-val">${sid}</span></div>
+    <div class="confirm-row"><span class="confirm-label">Title</span><span class="confirm-val">${title}</span></div>
+    <div class="confirm-row"><span class="confirm-label">Description</span><span class="confirm-val">${desc}</span></div>
+  `;
+  document.getElementById('confirmModal').style.display = 'flex';
+}
+
+async function finaliseBooking() {
+  const b = pendingBooking;
+  const btn = document.getElementById('confirmFinalBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader" style="width:16px;height:16px"></i> Saving…';
+  lucide.createIcons();
+
+  const slot = slots.find(s => s.time === b.slot);
+  if (slot) slot.taken = true;
+  selectedSlot = null;
+
+  const record = {
+    ...b,
+    bookedAt: new Date().toLocaleString('en-AU'),
+    num: bookings.length + 1
+  };
+  bookings.push(record);
+
+  // Push to Sheets
+  if (sheetsUrl) {
+    try {
+      await fetch(sheetsUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'booking', ...record })
+      });
+    } catch(e) {}
+  }
+
+  closeConfirmModal();
+  btn.disabled = false;
+  btn.innerHTML = '<i data-lucide="check-circle" style="width:16px;height:16px"></i> Confirm';
+  lucide.createIcons();
+
+  // Reset form
+  ['studentName','studentId','studentEmail','projectTitle','projectDesc'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('charCount').textContent = '0';
+  document.getElementById('submitBtn').disabled = true;
+  updateSlotDisplay();
+  renderSlots();
+
+  document.getElementById('successMsg').textContent =
+    `Your slot at ${b.slot} has been reserved. See you at the presentation!`;
+  document.getElementById('successModal').style.display = 'flex';
+  lucide.createIcons();
+}
+
+// ══════════════════════════════════════════════
+// ADMIN AUTH
+// ══════════════════════════════════════════════
+function openAdminLogin() {
+  document.getElementById('adminModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('adminPwInput').focus(), 50);
+}
+function closeAdminModal() {
+  document.getElementById('adminModal').style.display = 'none';
+  document.getElementById('adminPwInput').value = '';
+  document.getElementById('adminPwError').textContent = '';
+}
+function verifyAdmin() {
+  const pw = document.getElementById('adminPwInput').value;
+  if (pw === adminPassword) {
+    isAdmin = true;
+    closeAdminModal();
+    showAdminUI();
+    populateSettingsFields();
+    renderBookingsTable();
+  } else {
+    document.getElementById('adminPwError').textContent = 'Incorrect password. Try again.';
+    document.getElementById('adminPwInput').select();
+  }
+}
+function signOutAdmin() {
+  isAdmin = false;
+  hideAdminUI();
+  switchTab('book');
+}
+function showAdminUI() {
+  document.querySelectorAll('.admin-tab').forEach(t => t.style.display = '');
+  document.getElementById('adminBadge').style.display = 'flex';
+  const lockBtn = document.getElementById('adminLockBtn');
+  lockBtn.innerHTML = '<i data-lucide="unlock" style="width:18px;height:18px"></i>';
+  lockBtn.setAttribute('onclick', 'signOutAdmin()');
+  lockBtn.title = 'Sign out';
+  lucide.createIcons();
+}
+function hideAdminUI() {
+  document.querySelectorAll('.admin-tab').forEach(t => t.style.display = 'none');
+  document.getElementById('adminBadge').style.display = 'none';
+  const lockBtn = document.getElementById('adminLockBtn');
+  lockBtn.innerHTML = '<i data-lucide="lock" style="width:18px;height:18px"></i>';
+  lockBtn.setAttribute('onclick', 'openAdminLogin()');
+  lockBtn.title = 'Admin access';
+  lucide.createIcons();
+}
+
+// ══════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  ['book','bookings','settings'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
+  });
+  if (name === 'bookings') renderBookingsTable();
+  if (name === 'settings') populateSettingsFields();
+}
+
+// ══════════════════════════════════════════════
+// BOOKINGS TABLE
+// ══════════════════════════════════════════════
+function renderBookingsTable() {
+  const tbody = document.getElementById('bookingsTableBody');
+  const empty = document.getElementById('bookingsEmpty');
+  tbody.innerHTML = '';
+
+  document.getElementById('bookingCount').textContent = bookings.length;
+  renderStats();
+
+  if (!bookings.length) {
+    empty.style.display = 'flex';
+    lucide.createIcons();
+    return;
+  }
+  empty.style.display = 'none';
+  bookings.forEach(b => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${b.num}</td><td><strong>${b.slot}</strong></td>
+      <td>${b.name}</td><td>${b.sid}</td>
+      <td>${b.email||'—'}</td><td>${b.title}</td>
+      <td style="max-width:200px;white-space:normal">${b.desc}</td>
+      <td style="white-space:nowrap;font-size:var(--text-xs);color:var(--color-text-muted)">${b.bookedAt}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderStats() {
+  const total = slots.length;
+  const booked = slots.filter(s => s.taken).length;
+  const avail = total - booked;
+  const fill = total ? Math.round(booked / total * 100) : 0;
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Slots</div><div class="stat-value">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Booked</div><div class="stat-value">${booked}</div></div>
+    <div class="stat-card"><div class="stat-label">Available</div><div class="stat-value">${avail}</div></div>
+    <div class="stat-card"><div class="stat-label">Fill Rate</div><div class="stat-value">${fill}%</div></div>`;
+}
+
+function confirmClearAll() {
+  if (confirm('Clear all bookings? This cannot be undone.')) {
+    bookings = [];
+    slots.forEach(s => s.taken = false);
+    renderSlots();
+    renderBookingsTable();
+    updateSlotDisplay();
+  }
+}
+
+function exportCSV() {
+  const headers = ['#','Time Slot','Name','Student ID','Email','Project Title','Description','Booked At'];
+  const rows = bookings.map(b => [b.num,b.slot,b.name,b.sid,b.email||'',b.title,b.desc,b.bookedAt]
+    .map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'presentslot-bookings.csv';
+  a.click();
+}
+
+// ══════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════
+function populateSettingsFields() {
+  document.getElementById('sheetsUrl').value = sheetsUrl;
+  if (sessionConfig) {
+    document.getElementById('sessionDate').value   = sessionConfig.date       || '';
+    document.getElementById('courseCode').value    = sessionConfig.course     || '';
+    document.getElementById('startTime').value     = sessionConfig.startTime  || '';
+    document.getElementById('endTime').value       = sessionConfig.endTime    || '';
+    document.getElementById('slotDuration').value  = sessionConfig.slotDuration || 5;
+    document.getElementById('breakStart').value    = sessionConfig.breakStart || '';
+    document.getElementById('breakEnd').value      = sessionConfig.breakEnd   || '';
+  }
+}
+
+async function saveSettings() {
+  const url     = document.getElementById('sheetsUrl').value.trim();
+  const date    = document.getElementById('sessionDate').value;
+  const course  = document.getElementById('courseCode').value.trim();
+  const start   = document.getElementById('startTime').value;
+  const end     = document.getElementById('endTime').value;
+  const dur     = document.getElementById('slotDuration').value;
+  const bkS     = document.getElementById('breakStart').value;
+  const bkE     = document.getElementById('breakEnd').value;
+
+  if (!url) { showSettingsStatus('error', 'Please enter the Google Sheets URL first.'); return; }
+  if (!date || !start || !end) { showSettingsStatus('error', 'Date, start time and end time are required.'); return; }
+
+  sheetsUrl = url;
+  sessionConfig = { date, course, startTime:start, endTime:end, slotDuration:dur, breakStart:bkS, breakEnd:bkE };
+  buildSlotsFromConfig(sessionConfig);
+
+  showSettingsStatus('info', 'Saving to Google Sheets…');
+
+  try {
+    await fetch(sheetsUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'settings', ...sessionConfig, savedAt: new Date().toISOString() })
+    });
+    showSettingsStatus('success', `✓ Session saved. Students loading the page will see: ${course ? course+' · ':''} ${date} · ${start}–${end} (${slots.length} slots)`);
+    renderBookingView();
+  } catch(e) {
+    showSettingsStatus('error', 'Could not reach Google Sheets. Check the URL.');
+  }
+}
+
+function regenerateSlots() {
+  const start = document.getElementById('startTime').value;
+  const end   = document.getElementById('endTime').value;
+  const dur   = document.getElementById('slotDuration').value;
+  const bkS   = document.getElementById('breakStart').value;
+  const bkE   = document.getElementById('breakEnd').value;
+  if (!start || !end) { showSettingsStatus('error', 'Enter start and end time first.'); return; }
+  buildSlotsFromConfig({ startTime:start, endTime:end, slotDuration:dur, breakStart:bkS, breakEnd:bkE });
+  showSettingsStatus('success', `Preview: ${slots.length} slot(s) generated between ${start} and ${end}.`);
+}
+
+async function testSheetsConnection() {
+  const url = document.getElementById('sheetsUrl').value.trim();
+  if (!url) { showConnectionStatus('error','Enter the URL first.'); return; }
+  showConnectionStatus('info','Testing…');
+  try {
+    const r = await fetch(`${url}?type=ping&_t=${Date.now()}`);
+    const t = await r.text();
+    if (t.includes('ok') || t.includes('OK') || t.length > 0) {
+      showConnectionStatus('success','✓ Connection successful. Apps Script is reachable.');
+    } else {
+      showConnectionStatus('error','Response received but unexpected content. Check your deployment.');
+    }
+  } catch(e) {
+    showConnectionStatus('error','Could not reach the URL. Make sure the deployment is set to "Anyone".');
+  }
+}
+
+function showSettingsStatus(type, msg) {
+  const el = document.getElementById('settingsStatus');
+  el.innerHTML = `<div class="status-banner status-${type}">${msg}</div>`;
+}
+function showConnectionStatus(type, msg) {
+  const el = document.getElementById('connectionStatus');
+  el.innerHTML = `<div class="status-banner status-${type}">${msg}</div>`;
+}
+
+function changePassword() {
+  const pw = document.getElementById('newPassword').value;
+  if (!pw || pw.length < 4) {
+    document.getElementById('pwStatus').innerHTML = '<div class="status-banner status-error">Password must be at least 4 characters.</div>';
+    return;
+  }
+  adminPassword = pw;
+  document.getElementById('newPassword').value = '';
+  document.getElementById('pwStatus').innerHTML = '<div class="status-banner status-success">✓ Password updated.</div>';
+}
+
+function togglePwVis(id) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// ══════════════════════════════════════════════
+// MODALS
+// ══════════════════════════════════════════════
+function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
+function closeSuccessModal() { document.getElementById('successModal').style.display = 'none'; }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeAdminModal(); closeConfirmModal(); closeSuccessModal();
+  }
+});
+
+// ══════════════════════════════════════════════
+// APPS SCRIPT
+// ══════════════════════════════════════════════
+function populateScript() {
+  const script = `// PresentSlot — Google Apps Script
+// Paste this in Extensions > Apps Script, deploy as Web App
+// Execute as: Me | Who has access: Anyone
+
+const SHEET_NAME_BOOKINGS = 'Bookings';
+const SHEET_NAME_SETTINGS = 'Session Settings';
+
+function doGet(e) {
+  const type = e.parameter.type;
+
+  // Ping check
+  if (type === 'ping') {
+    return ContentService.createTextOutput(JSON.stringify({status:'ok'}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // Return config + bookings so ANY browser can load session data
+  if (type === 'getConfig') {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // Get latest settings row
+    let config = null;
+    try {
+      const settingsSheet = ss.getSheetByName(SHEET_NAME_SETTINGS);
+      if (settingsSheet && settingsSheet.getLastRow() > 1) {
+        const headers = settingsSheet.getRange(1, 1, 1, settingsSheet.getLastColumn()).getValues()[0];
+        const lastRow  = settingsSheet.getRange(settingsSheet.getLastRow(), 1, 1, settingsSheet.getLastColumn()).getValues()[0];
+        config = {};
+        headers.forEach((h, i) => { config[h] = lastRow[i]; });
+      }
+    } catch(err) {}
+
+    // Get all bookings
+    let bookings = [];
+    try {
+      const bSheet = ss.getSheetByName(SHEET_NAME_BOOKINGS);
+      if (bSheet && bSheet.getLastRow() > 1) {
+        const bHeaders = bSheet.getRange(1,1,1,bSheet.getLastColumn()).getValues()[0];
+        const bData    = bSheet.getRange(2,1,bSheet.getLastRow()-1,bSheet.getLastColumn()).getValues();
+        bookings = bData.map(row => {
+          const obj = {};
+          bHeaders.forEach((h,i) => obj[h] = row[i]);
+          return { slot: obj['Time Slot'] };
+        });
+      }
+    } catch(err) {}
+
+    const payload = JSON.stringify({ config, bookings });
+    return ContentService.createTextOutput(payload)
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService.createTextOutput('{}').setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  const data = JSON.parse(e.postData.contents);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  if (data.type === 'booking') {
+    let sheet = ss.getSheetByName(SHEET_NAME_BOOKINGS);
+    if (!sheet) {
+      sheet = ss.insertSheet(SHEET_NAME_BOOKINGS);
+      const h = sheet.getRange(1,1,1,8);
+      h.setValues([['Booking #','Time Slot','Full Name','Student ID','Email','Project Title','Description','Booked At']]);
+      h.setBackground('#01696f');
+      h.setFontColor('#ffffff');
+      h.setFontWeight('bold');
+    }
+    sheet.appendRow([data.num, data.slot, data.name, data.sid, data.email||'', data.title, data.desc, data.bookedAt]);
+  }
+
+  if (data.type === 'settings') {
+    let sheet = ss.getSheetByName(SHEET_NAME_SETTINGS);
+    if (!sheet) {
+      sheet = ss.insertSheet(SHEET_NAME_SETTINGS);
+      const h = sheet.getRange(1,1,1,8);
+      h.setValues([['date','course','startTime','endTime','slotDuration','breakStart','breakEnd','savedAt']]);
+      h.setBackground('#01696f');
+      h.setFontColor('#ffffff');
+      h.setFontWeight('bold');
+    }
+    sheet.appendRow([data.date, data.course, data.startTime, data.endTime,
+      data.slotDuration, data.breakStart||'', data.breakEnd||'', data.savedAt]);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({status:'ok'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+  document.getElementById('scriptPre').textContent = script;
+}
+
+let scriptVisible = false;
+function toggleScript() {
+  scriptVisible = !scriptVisible;
+  document.getElementById('scriptBox').style.display = scriptVisible ? 'block' : 'none';
+  document.getElementById('scriptToggleLabel').textContent = scriptVisible ? 'Hide Apps Script code' : 'Show Apps Script code';
+}
+function copyScript() {
+  navigator.clipboard.writeText(document.getElementById('scriptPre').textContent)
+    .then(() => showConnectionStatus('success','✓ Script copied to clipboard.'))
+    .catch(() => alert('Select the code manually and copy.'));
+}
+</script>
+</body>
+</html>
